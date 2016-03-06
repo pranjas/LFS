@@ -1,0 +1,6 @@
+version=2.25.1
+depends=none
+EXTRA_CONF=	--disable-nls --disable-werror --target=$(uname -m) \
+		--with-sysroot=$LFS_ROOT_DIR \
+		--with-lib-path=${libdir} \
+		--prefix=${LFS_ROOT_DIR} \

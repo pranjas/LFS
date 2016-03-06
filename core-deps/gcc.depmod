@@ -1,0 +1,23 @@
+version=5.2.0
+depends=gmp mpfr mpc
+EXTRA_CONF =	--with-newlib \
+		--prefix=${LFS_ROOT_DIR} \
+		--with-lib=${libdir} \
+		--without-headers \
+		--with-local-prefix=$LFS_ROOT_DIR \
+		--with-native-system-header-dir=$LFS_ROOT/include \
+		--disable-nls \
+		--disable-shared \
+		--disable-multilib \
+		--disable-decimal-float \
+		--disable-threads \
+		--disable-libatomic \
+		--disable-libgomp \
+		--disable-libitm \
+		--disable-libquadmath \
+		--disable-libsanitizer \
+		--disable-libssp \
+		--disable-libvtv \
+		--disable-libcilkrts \
+		--disable-libstdc++-v3 \
+		--enable-languages=c,c++

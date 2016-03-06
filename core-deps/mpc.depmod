@@ -1,0 +1,5 @@
+version=1.0.3
+depends=mpfr
+EXTRA_CONF=	--with-mpfr-include=${includedir} \
+		--with-mpfr-lib=${libdir} \
+		--with-sysroot=$LFS_ROOT_DIR

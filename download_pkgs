@@ -1,0 +1,34 @@
+#!/bin/bash
+if [ x"$LFS_ROOTDIR" = x ]
+then
+	LFS_ROOTDIR=$1
+fi
+
+
+if [ x"$LFS_ROOTDIR" = x ]
+then
+	echo "You must export LFS_ROOTDIR variable or..."
+	echo "Run the script as $0 <LFS_ROOTDIR_LOCATION>"
+	exit 1;
+fi
+LFS=$LFS_ROOTDIR
+SRC_DOWNLOAD_DIR="${LFS}/src"
+CURRENT_DIR="$(pwd)"
+if [ ! x"$LFS" = x ]
+then
+SRC_DOWNLOAD_DIR=$LFS/src
+fi
+
+echo "Downloading sources... in ${SRC_DOWNLOAD_DIR}"
+if [ ! -d ${SRC_DOWNLOAD_DIR} ]
+then
+mkdir -p ${SRC_DOWNLOAD_DIR}
+fi;
+
+wget -nc --input-file=pkg_list --continue --directory-prefix=${SRC_DOWNLOAD_DIR}
+
+echo "Checking packages for consistency..."
+pushd ${SRC_DOWNLOAD_DIR}
+md5sum -c ${CURRENT_DIR}/md5sums
+popd
+
