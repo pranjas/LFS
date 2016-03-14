@@ -35,37 +35,96 @@ do
 done
 }
 
+function do_clean
+{
+	set -x;
+	if [ x"$SRCDIR" = x ]
+	then
+		SRCDIR=$LFS_BUILD_DIR/$1
+	fi
 
-function do_configure_one
+	if [ x"$WORKDIR" = x ]
+	then
+		WORKDIR=$SRCDIR
+	fi
+
+	cd $WORKDIR
+	make distclean
+	cd -;
+	set +x;
+}
+
+function do_configure
 {
 	do_build_type
-	cd $LFS_BUILD_DIR/$1
-	if [ ! -e configure ]
+	if [ x"$SRCDIR" = x ]
 	then
-		if [ ! -e configure.ac ]
+		SRCDIR=$LFS_BUILD_DIR/$1
+	fi
+
+	if [ x"$WORKDIR" = x ]
+	then
+		WORKDIR=$SRCDIR
+	fi
+
+	cd $WORKDIR
+	if [ ! -e $SRCDIR/configure ]
+	then
+		if [ ! -e $SRCDIR/configure.ac ]
 		then
 			echo "Component $component doesn't have configure or configure.ac"
 			echo "Continuing without configuring $component ..."
 			continue;
 		else #configure.ac exists.
-			autoreconf -i --prefix=$LFS_CONFIGURE_PREFIX;
+			$SRCDIR/autoreconf -i --prefix=$LFS_CONFIGURE_PREFIX;
 		fi
 	else #configure  exists.
 		#Do nothing.
 		echo "" > /dev/null
 	fi
 	set -x;
-	./configure --prefix=$LFS_CONFIGURE_PREFIX --build=$BUILD_TYPE --host=$(uname -m) \
+	$SRCDIR/configure --prefix=$LFS_CONFIGURE_PREFIX --build=$BUILD_TYPE --host=$(uname -m) \
 			--with-sysroot=$LFS_ROOT_DIR $EXTRA_CONF
-	if [ $? -eq 0 ]
+	set +x;
+	cd -;
+}
+
+function do_compile
+{
+	if [ x"$SRCDIR" = x ]
 	then
-		make && make install 2>&1 > $LFS_BUILD_DIR/$1.log
-	fi;
+		SRCDIR=$LFS_BUILD_DIR/$1
+	fi
+
+	if [ x"$WORKDIR" = x ]
+	then
+		WORKDIR=$SRCDIR
+	fi
+
+	cd $WORKDIR
+	set -x;
+		make
 	set +x
-
-
 	cd -
+}
 
+function do_install
+{
+	if [ x"$SRCDIR" = x ]
+	then
+		SRCDIR=$LFS_BUILD_DIR/$1
+	fi
+
+	if [ x"$WORKDIR" = x ]
+	then
+		WORKDIR=$SRCDIR
+	fi
+
+	cd $WORKDIR
+	set -x;
+		make install
+	set +x
+	cd -
 }
 _cmd=$2
 shift

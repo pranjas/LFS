@@ -1,2 +1,7 @@
-version=6.0.0
-depends=none
+version:=6.0.0
+depends:=none
+EXTRA_CONF:=	--host=$(uname -m) \
+		--build=$(uname -m) \
+		--with-sysroot=$LFS_ROOT_DIR \
+		--with-lib-path=${libdir} \
+		--target=$(uname -m)-pc-linux-gnu

@@ -1,11 +1,21 @@
-version=5.2.0
-depends=gmp mpfr mpc
-EXTRA_CONF =	--with-newlib \
+version:=5.2.0
+depends:=gmp mpfr mpc isl binutils
+WORKDIR:=${LFS_ROOT_DIR}/tools/gcc-build-dir
+EXTRA_CONF :=	--with-newlib \
 		--prefix=${LFS_ROOT_DIR} \
 		--with-lib=${libdir} \
+		--with-build-sysroot=${LFS_ROOT_DIR} \
+		--with-mpfr-include=${LFS_ROOT_DIR}/include \
+		--with-mpc-include=${LFS_ROOT_DIR}/include \
+		--with-gmp-include=${LFS_ROOT_DIR}/include \
+		--with-isl-include=${LFS_ROOT_DIR}/include \
+		--with-gmp-lib=${libdir} \
+		--with-mpfr-lib=${libdir} \
+		--with-mpc-lib=${libdir} \
+		--with-isl-lib=${libdir} \
 		--without-headers \
 		--with-local-prefix=$LFS_ROOT_DIR \
-		--with-native-system-header-dir=$LFS_ROOT/include \
+		--with-native-system-header-dir=$LFS_ROOT_DIR/include \
 		--disable-nls \
 		--disable-shared \
 		--disable-multilib \
@@ -20,4 +30,5 @@ EXTRA_CONF =	--with-newlib \
 		--disable-libvtv \
 		--disable-libcilkrts \
 		--disable-libstdc++-v3 \
-		--enable-languages=c,c++
+		--enable-languages=c,c++ \
+		--target=$(uname -m)-pc-linux-gnu

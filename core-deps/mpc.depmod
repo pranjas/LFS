@@ -1,5 +1,10 @@
-version=1.0.3
-depends=mpfr
-EXTRA_CONF=	--with-mpfr-include=${includedir} \
+version:=1.0.3
+depends:=mpfr
+EXTRA_CONF:=	--with-mpfr-include=$LFS_ROOT_DIR/include \
 		--with-mpfr-lib=${libdir} \
-		--with-sysroot=$LFS_ROOT_DIR
+		--with-sysroot=$LFS_ROOT_DIR \
+		--host=$(uname -m) \
+		--target=$(uname -m)-pc-linux-gnu \
+		--build=$(uname -m) \
+
+

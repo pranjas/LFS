@@ -1,6 +1,14 @@
-version=2.25.1
-depends=none
-EXTRA_CONF=	--disable-nls --disable-werror --target=$(uname -m) \
+version:=2.25.1
+depends:=mpfr gmp
+EXTRA_CONF:=	--disable-nls --disable-werror --target=$(uname -m)-pc-linux-gnu \
+		--host=$(uname -m) \
+		--build=$(uname -m) \
 		--with-sysroot=$LFS_ROOT_DIR \
 		--with-lib-path=${libdir} \
+		--with-mpfr-lib=${libdir} \
+		--with-gmp-lib=${libdir} \
 		--prefix=${LFS_ROOT_DIR} \
+		--with-build-sysroot=${LFS_ROOT_DIR} \
+		--with-gmp-include=${LFS_ROOT_DIR}/include \
+		--with-mpfr-include=${LFS_ROOT_DIR}/include \
+		

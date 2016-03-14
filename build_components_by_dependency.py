@@ -8,6 +8,8 @@ class LFSModule:
 		self.depmod = dict()
 		self.name = ""
 
+
+			
 def get_module_with_deps(filename):
 	d = LFSModule();
 	with open(filename) as f:
@@ -29,7 +31,7 @@ def get_module_with_deps(filename):
 					continue;
 			else:
 				pass;
-			tokens = line.split("=")
+			tokens = line.split(":=")
 			for index,t in enumerate(tokens):
 				tokens[index] = t.strip(' ');
 				tokens[index] = tokens[index].strip('\t')
@@ -43,10 +45,12 @@ def get_module_with_deps(filename):
 				if(option_continue):
 					if (line[-2] != '\\'):
 						option_continue = False
-					if (line[-1] == '\n'):
+					if (line[-1] == '\n') and option_continue:
 						d.depmod[option_key] = d.depmod[option_key] + line[:-2]
-					else:
+					elif (line[-1] == '\n'):
 						d.depmod[option_key] = d.depmod[option_key] + line[:-1]
+					else:
+						d.depmod[option_key] = d.depmod[option_key] + line
 					
 				elif(len(tokens) == 2):
 					if (tokens[1][-2] == '\\'):

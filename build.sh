@@ -2,7 +2,6 @@
 #Add more directories here to be in rootfs / directory.
 SYSTEM_DIRS="boot root home usr usr/src tmp opt www dev tools src tools/state"
 
-
 function create_system_dirs
 {
 	for dir in $SYSTEM_DIRS
