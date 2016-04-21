@@ -3,6 +3,7 @@ LFS_ROOT_DIR=$1
 LFS_SRC_DIR=$LFS_ROOT_DIR/src/src
 LFS_BUILD_DIR=$LFS_ROOT_DIR/tools/
 LFS_CONFIGURE_PREFIX=$LFS_ROOT_DIR
+LFS_COMPONENT_STATE_DIR=$LFS_BUILD_DIR/state
 
 COMPONENTS=$(find $LFS_BUILD_DIR -maxdepth 1 -mindepth 1 -type d)
 
@@ -35,6 +36,27 @@ do
 done
 }
 
+function check_opt
+{
+	local options=$1
+	shift
+	local opts_to_check=$*
+	local OPTIND
+	local opt
+	local retval=1
+	while getopts $options opt
+	do
+		for opts in $(echo $opts_to_check)
+		do
+			if [ ! "$opts" = "opt" ]
+			then
+				retval=0;
+			fi
+		done
+	done
+	return 0;
+}
+
 function do_clean
 {
 	set -x;
@@ -57,6 +79,7 @@ function do_clean
 function do_configure
 {
 	do_build_type
+	local force=check_opt $1 $*
 	if [ x"$SRCDIR" = x ]
 	then
 		SRCDIR=$LFS_BUILD_DIR/$1
@@ -65,6 +88,21 @@ function do_configure
 	if [ x"$WORKDIR" = x ]
 	then
 		WORKDIR=$SRCDIR
+	fi
+
+	for arg in $(echo $*)
+	do
+		if [ "$arg" = "-f" ]
+		then
+			force=1;
+			break;
+		fi
+	done
+
+	if [ -e $LFS_COMPONENT_STATE_DIR/$1/.configure ] && [ ! $force -eq 1 ]
+	then
+		echo "Component $1 is already configured. Use -f to force"
+		return 0
 	fi
 
 	cd $WORKDIR
@@ -85,6 +123,10 @@ function do_configure
 	set -x;
 	$SRCDIR/configure --prefix=$LFS_CONFIGURE_PREFIX --build=$BUILD_TYPE --host=$(uname -m) \
 			--with-sysroot=$LFS_ROOT_DIR $EXTRA_CONF
+	if [ $? -eq 0 ]
+	then
+		touch $LFS_COMPONENT_STATE_DIR/$1/.configure
+	fi
 	set +x;
 	cd -;
 }
