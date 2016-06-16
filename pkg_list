@@ -68,7 +68,6 @@ http://www.zlib.net/zlib-1.2.8.tar.xz
 http://www.linuxfromscratch.org/patches/lfs/systemd/bash-4.3.30-upstream_fixes-2.patch
 http://www.linuxfromscratch.org/patches/lfs/systemd/bc-1.06.95-memory_leak-1.patch
 http://www.linuxfromscratch.org/patches/lfs/systemd/bzip2-1.0.6-install_docs-1.patch
-http://www.linuxfromscratch.org/patches/lfs/systemd/coreutils-8.24-i18n-1.patch
 http://www.linuxfromscratch.org/patches/lfs/systemd/glibc-2.22-fhs-1.patch
 http://www.linuxfromscratch.org/patches/lfs/systemd/glibc-2.22-upstream_i386_fix-1.patch
 http://www.linuxfromscratch.org/patches/lfs/systemd/kbd-2.0.3-backspace-1.patch

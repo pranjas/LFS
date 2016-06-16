@@ -13,7 +13,6 @@ def get_module_with_code(filename):
 			'do_install':False}
 	try:
 		with open(filename) as f:
-			processing_function = False;
 			current_function = []
 			code="";
 			while True:
@@ -22,22 +21,15 @@ def get_module_with_code(filename):
 					break;
 				line = line.strip(' ')
 				line = line.strip('\t')
-				if processing_function:
-					code = code + line
-					continue
 				for key,value in keywords.items():
+
 					if key in line:
 						if value: #True/False
 							print "Already parsing/parsed {0}".format(key)
 							raise Exception("Invalid file format")
 						else:
 							keywords[key] = True
-							processing_function = True
-							code = code + line
-				if not processing_function:
-					code = code + line
-				if line[-1] == '}':
-					processing_function = False
+				code = code + line
 			result.append(code)
 			result.append(keywords)
 	except (IOError):

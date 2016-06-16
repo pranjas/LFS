@@ -25,7 +25,9 @@ def put_env_vars(root_dir):
 	os.putenv("LFS_ROOT_DIR", root_dir)
 	os.putenv("sysconfdir", root_dir + "/etc")
 	os.putenv("includedir", root_dir + "/usr/include")
-	os.putenv("PATH", root_dir+"/bin;" + bin_path_exports)
+	os.environ['PATH'] = root_dir+"/bin:" + os.environ['PATH']
+#	os.putenv("PATH", root_dir+"/bin:" + bin_path_exports)
+	print "PATH is {0}".format(os.getenv("PATH"))
 
 
 def check_and_put_env(dict_env,keyname):
@@ -33,7 +35,7 @@ def check_and_put_env(dict_env,keyname):
 		print "Putting {0} as {1}".format(keyname, dict_env[keyname])
 		evaled_env= subprocess.check_output("echo " + dict_env[keyname].strip()\
 				,shell = True)
-		os.putenv(keyname, evaled_env)
+		os.putenv(keyname, evaled_env.strip())
 
 def do_build(root_dir):
 	tmp_file = '.lfs_tmp_file'
@@ -53,7 +55,7 @@ def do_build(root_dir):
 			os.system("./build.sh " + root_dir)
 			deps_graph = build_components_by_dependency.make_dependency_graph("./core-deps")
 			for dep in deps_graph:
-				print "Starting build for {0}".format(dep.name)
+				print "Starting build for {0} with path {1}".format(dep.name, os.getenv('PATH'))
 				check_and_put_env(dep.depmod, 'EXTRA_CONF')
 				mod_result = get_module_code.get_module_with_code("./core-exec/" + dep.name + ".exec")
 				exec_name = get_module_code.create_tmp_exec_file(mod_result[0])
@@ -62,6 +64,10 @@ def do_build(root_dir):
 				for cmd in __COMMAND:
 					check_and_put_env(dep.depmod, 'WORKDIR')
 					check_and_put_env(dep.depmod, 'SRCDIR')
+					check_and_put_env(dep.depmod, 'CROSS_COMPILE')
+					check_and_put_env(dep.depmod, 'CC')
+					check_and_put_env(dep.depmod, 'CXX')
+					check_and_put_env(dep.depmod, 'LD')
 					if custom_cmd_dict["do_pre_" + cmd ]:
 						subprocess.check_output(exec_name + " " + "do_pre_" + cmd\
 							+" " + dep.name +"-"+dep.depmod['version'], shell = True)
@@ -78,6 +84,10 @@ def do_build(root_dir):
 							+" " + dep.name +"-"+dep.depmod['version'], shell = True)
 					os.unsetenv('WORKDIR')
 					os.unsetenv('SRCDIR')
+					os.unsetenv('CROSS_COMPILE')
+					os.unsetenv('CC')
+					os.unsetenv('CXX')
+					os.unsetenv('LD')
 				get_module_code.unlink_tmp_exec_file(exec_name)
 				os.unsetenv('EXTRA_CONF')
 

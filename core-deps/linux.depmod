@@ -1,0 +1,9 @@
+version:=4.2 
+depends:=gcc
+CROSS_COMPILE:=x86_64-pc-linux-gnu-
+EXTRA_CONF:=    --host=$(uname -m) \
+                --build=$(uname -m) \
+                --with-sysroot=$LFS_ROOT_DIR \
+                --with-lib-path=${libdir} \
+                --target=$(uname -m)-pc-linux-gnu
+SRCDIR:=${LFS_ROOT_DIR}/tools/linux-4.2

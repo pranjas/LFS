@@ -36,27 +36,6 @@ do
 done
 }
 
-function check_opt
-{
-	local options=$1
-	shift
-	local opts_to_check=$*
-	local OPTIND
-	local opt
-	local retval=1
-	while getopts $options opt
-	do
-		for opts in $(echo $opts_to_check)
-		do
-			if [ ! "$opts" = "opt" ]
-			then
-				retval=0;
-			fi
-		done
-	done
-	return 0;
-}
-
 function do_clean
 {
 	set -x;
@@ -79,7 +58,13 @@ function do_clean
 function do_configure
 {
 	do_build_type
-	local force=check_opt $1 $*
+	local config_log_file=$LFS_COMPONENT_STATE_DIR/$1/configure.log_$(date +%d_%m_%y)
+	if [ ! -d $LFS_COMPONENT_STATE_DIR/$1 ]
+	then
+		mkdir -p $LFS_COMPONENT_STATE_DIR/$1
+	fi
+	local force=0
+	local retval=0;
 	if [ x"$SRCDIR" = x ]
 	then
 		SRCDIR=$LFS_BUILD_DIR/$1
@@ -99,10 +84,16 @@ function do_configure
 		fi
 	done
 
+set -x;
 	if [ -e $LFS_COMPONENT_STATE_DIR/$1/.configure ] && [ ! $force -eq 1 ]
 	then
 		echo "Component $1 is already configured. Use -f to force"
-		return 0
+		return $retval
+	fi
+
+	if [ ! -d $WORKDIR ]
+	then
+		mkdir -p $WORKDIR
 	fi
 
 	cd $WORKDIR
@@ -114,25 +105,31 @@ function do_configure
 			echo "Continuing without configuring $component ..."
 			continue;
 		else #configure.ac exists.
-			$SRCDIR/autoreconf -i --prefix=$LFS_CONFIGURE_PREFIX;
+			echo "Configure log present in $confile_log_file"
+			autoreconf -i --prefix=$LFS_CONFIGURE_PREFIX 2>&1 | tee $config_log_file
+			ln -s $config_log_file $LFS_COMPONENT_STATE_DIR/$1/configure.log
 		fi
 	else #configure  exists.
 		#Do nothing.
 		echo "" > /dev/null
 	fi
+set +x;
 	set -x;
 	$SRCDIR/configure --prefix=$LFS_CONFIGURE_PREFIX --build=$BUILD_TYPE --host=$(uname -m) \
-			--with-sysroot=$LFS_ROOT_DIR $EXTRA_CONF
+			--with-sysroot=$LFS_ROOT_DIR $EXTRA_CONF 2>&1 | tee -a $config_log_file
+	retval=$?
 	if [ $? -eq 0 ]
 	then
 		touch $LFS_COMPONENT_STATE_DIR/$1/.configure
 	fi
 	set +x;
 	cd -;
+	return $retval;
 }
 
 function do_compile
 {
+	local force=0;
 	if [ x"$SRCDIR" = x ]
 	then
 		SRCDIR=$LFS_BUILD_DIR/$1
@@ -142,16 +139,36 @@ function do_compile
 	then
 		WORKDIR=$SRCDIR
 	fi
+	
+	for arg in $(echo $*)
+	do
+		if [ "$arg" = "-f" ]
+		then
+			force=1;
+			break;
+		fi
+	done
+
+	if [ -e $LFS_COMPONENT_STATE_DIR/$1/.compile ] && [ ! $force -eq 1 ]
+	then
+		echo "Component $1 is already configured. Use -f to force"
+		return 0
+	fi
 
 	cd $WORKDIR
 	set -x;
 		make
+	if [ $? -eq 0 ]
+	then
+		touch $LFS_COMPONENT_STATE_DIR/$1/.compile
+	fi
 	set +x
 	cd -
 }
 
 function do_install
 {
+	local force=0;
 	if [ x"$SRCDIR" = x ]
 	then
 		SRCDIR=$LFS_BUILD_DIR/$1
@@ -161,10 +178,20 @@ function do_install
 	then
 		WORKDIR=$SRCDIR
 	fi
-
+	for arg in $(echo $*)
+	do
+		if [ "$arg" = "-f" ]
+		then
+			force=1;
+			break;
+		fi
+	done
 	cd $WORKDIR
 	set -x;
-		make install
+		if [ ! -e $LFS_COMPONENT_STATE_DIR/$1/.compile ] || [ $force -eq 1 ]
+		then
+			make install
+		fi
 	set +x
 	cd -
 }

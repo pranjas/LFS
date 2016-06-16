@@ -1,0 +1,18 @@
+version:=2.22 
+depends:=linux
+EXTRA_CONF:=    --host=$(uname -m) \
+                --build=pc-linux-gnu \
+                --with-sysroot=$LFS_ROOT_DIR \
+                --with-lib-path=${libdir} \
+                --target=$(uname -m)-pc-linux-gnu \
+		--disable-profile \
+		--enable-kernel=4.2 \
+		--with-headers=${includedir} \
+		libc_cv_forced_unwind=yes \
+		libc_cv_ctors_header=yes \
+		libc_cv_c_cleanup=yes
+#CROSS_COMPILE:=x86_64-pc-linux-gnu-
+#CC:=${CROSS_COMPILE}gcc
+#CXX:=${CROSS_COMPILE}g++
+#LD:=${CROSS_COMPILE}ld
+WORKDIR:=${LFS_ROOT_DIR}/tools/glibc-build
